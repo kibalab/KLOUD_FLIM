@@ -1,0 +1,7 @@
+{
+  "name": "com.kloud.flim",
+  "version": "0.1.0",
+  "displayName": "FLIM",
+  "description": "Fly message effect from twitch IRC",
+  "type": "tests"
+}
