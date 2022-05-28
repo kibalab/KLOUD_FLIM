@@ -1,0 +1,16 @@
+{
+    "name": "KLOUD.FLIM",
+    "rootNamespace": "KLOUD.FLIM",
+    "references": [
+        "GUID:efb97163b5826ee45a10ef656fc102e5"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
