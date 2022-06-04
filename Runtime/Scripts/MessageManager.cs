@@ -7,7 +7,9 @@ using Unity.Collections;
 using Unity.Jobs;
 using UnityEngine;
 using UnityEngine.Jobs;
+using UnityEngine.TextCore;
 using UnityEngine.UI;
+using UnityEngine.UIElements;
 using Random = UnityEngine.Random;
 
 namespace KLOUD
@@ -34,6 +36,8 @@ namespace KLOUD
         public string ChennalID;
         
         public Text ReferenceText;
+        public RawImage ReferenceImage;
+        public Material EmojiSource;
         
         public float Speed = 10;
         public List<Text> SpawnedTexts = new List<Text>();
@@ -51,9 +55,12 @@ namespace KLOUD
             WebsocketConnecter.Connect(ChennalID);
             
             WebsocketConnecter.onReceivedMessage.AddListener(
-                msg => MessageEventManager.Enqueue(
-                    TwitchMessageParser.Parse(msg).Item2
-                    ));
+                msg =>
+                {
+                    var (author, ctx, emojis) = TwitchMessageParser.Parse(msg, EmojiSource);
+                    
+                    if(!String.IsNullOrEmpty(author)) MessageEventManager.Enqueue(ctx, emojis);
+                });
         }
 
         public void UpdateJob()
@@ -65,7 +72,7 @@ namespace KLOUD
             transforms = new TransformAccessArray(SpawnedTexts.Select((Text t) => t.transform).ToArray());
         }
 
-        public Text SpawnText(string text)
+        public Text SpawnText(string text, List<TwitchMessageParser.emoji> emojis)
         {
             var messageObj = Instantiate(ReferenceText.gameObject, ReferenceText.transform.parent).GetComponent<Text>();
             ((RectTransform) messageObj.transform).pivot = new Vector2(-1, 1);
@@ -79,6 +86,41 @@ namespace KLOUD
             messageObj.text = text;
             messageObj.gameObject.SetActive(true);
 
+            foreach (var emoji in emojis)
+            {
+                var i = 1;
+
+                messageObj.text = messageObj.text.Replace(emoji.tag, "<E>");
+                
+                while (messageObj.text.Contains("<E>"))
+                {
+                    if (messageObj.GetWordRectInText(out var rect, "<E>"))
+                    {
+                        messageObj.text = messageObj.text.ReplaceFirst("<E>", "   ");
+                        var emojiObj = Instantiate(ReferenceImage.gameObject, messageObj.transform).GetComponent<RawImage>();
+                        var emojiRenderer = emojiObj.gameObject.AddComponent<EmojiRenderer>();
+
+                        emojiRenderer.Emoji = emoji;
+                        emojiRenderer.Image = emojiObj;
+                        emojiRenderer.Load();
+
+                        emojiObj.rectTransform.anchoredPosition = new Vector2(rect.x, 0);
+                        emojiObj.rectTransform.sizeDelta = new Vector2(
+                            messageObj.rectTransform.sizeDelta.y,
+                            messageObj.rectTransform.sizeDelta.y);
+
+                        emojiObj.rectTransform.parent = messageObj.rectTransform;
+                        i++;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                
+            }
+            
+
             return messageObj;
         }
 
@@ -87,10 +129,6 @@ namespace KLOUD
             if (JobHandle.IsCompleted)
             {
                 JobHandle.Complete();
-                
-                
-                    
-                Debug.Log("Destroy" + $" {JobCommand.DeleteTargetIndexes.Length}");
                 var i = 0;
                 foreach (var b in JobCommand.DeleteTargetIndexes)
                 {
@@ -110,7 +148,7 @@ namespace KLOUD
                 while (!MessageEventManager.IsEmpty())
                 {
                     var messageEvent = MessageEventManager.Dequeue();
-                    var spawnedText = SpawnText(messageEvent.Message);
+                    var spawnedText = SpawnText(messageEvent.Message, messageEvent.Emojis);
                     SpawnedTexts.Add(spawnedText);
                 }
                 UpdateJob();
