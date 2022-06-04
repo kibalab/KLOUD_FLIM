@@ -3,5 +3,8 @@
   "version": "0.1.0",
   "displayName": "FLIM",
   "description": "Fly message effect from twitch IRC",
-  "type": "tests"
+  "type": "module",
+  "dependencies": {
+    "com.unity.textmeshpro": ""
+  }
 }
