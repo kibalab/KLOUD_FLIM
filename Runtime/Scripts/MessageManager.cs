@@ -37,7 +37,6 @@ namespace KLOUD
         
         public Text ReferenceText;
         public RawImage ReferenceImage;
-        public Material EmojiSource;
         
         public float Speed = 10;
         public List<Text> SpawnedTexts = new List<Text>();
@@ -57,7 +56,7 @@ namespace KLOUD
             WebsocketConnecter.onReceivedMessage.AddListener(
                 msg =>
                 {
-                    var (author, ctx, emojis) = TwitchMessageParser.Parse(msg, EmojiSource);
+                    var (author, ctx, emojis) = TwitchMessageParser.Parse(msg);
                     
                     if(!String.IsNullOrEmpty(author)) MessageEventManager.Enqueue(ctx, emojis);
                 });

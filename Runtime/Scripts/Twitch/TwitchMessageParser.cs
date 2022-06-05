@@ -10,7 +10,7 @@ namespace KLOUD.Twitch
     
     public class TwitchMessageParser
     {
-        public static (string, string, List<emoji>) Parse(string text, Material source)
+        public static (string, string, List<emoji>) Parse(string text)
         {
             if (!text.Contains("PRIVMSG"))
             {
