@@ -17,14 +17,14 @@ namespace KLOUD
     public struct MessageJob : IJobParallelForTransform
     {
         public NativeArray<bool> DeleteTargetIndexes;
-        //public int[] localSpeed;
+        public NativeArray<float> localSpeed;
         public float Speed;
         public float TimeDelta;
         
         public void Execute(int index, TransformAccess transform)
         {
             var Pos = transform.localPosition;
-            Pos.x -= Speed * TimeDelta;// * localSpeed[index];
+            Pos.x -= Speed * TimeDelta * localSpeed[index];
             transform.localPosition = Pos;
 
             DeleteTargetIndexes[index] = Pos.x <= -2500;
@@ -38,7 +38,9 @@ namespace KLOUD
         public Text ReferenceText;
         public RawImage ReferenceImage;
         
-        public float Speed = 10;
+        public float MasterSpeed = 10;
+        public Vector2 ClampSpeedRange = new Vector2(20, 35);
+        public Vector2 RandomSizeRange = new Vector2(20, 35);
         public List<Text> SpawnedTexts = new List<Text>();
         public TransformAccessArray transforms = new TransformAccessArray();
         
@@ -64,8 +66,11 @@ namespace KLOUD
 
         public void UpdateJob()
         {
-            JobCommand.Speed = Speed;
+            JobCommand.Speed = MasterSpeed;
             JobCommand.TimeDelta = Time.deltaTime;
+
+            JobCommand.localSpeed = new NativeArray<float>(SpawnedTexts.Count, Allocator.Persistent);
+            JobCommand.localSpeed.CopyFrom(SpawnedTexts.Select((Text t) => Mathf.Clamp(t.text.Length * 2f, ClampSpeedRange.x, ClampSpeedRange.y)).ToArray());
             
             JobCommand.DeleteTargetIndexes = new NativeArray<bool>( SpawnedTexts.Count, Allocator.Persistent );
             transforms = new TransformAccessArray(SpawnedTexts.Select((Text t) => t.transform).ToArray());
@@ -82,6 +87,7 @@ namespace KLOUD
                 Random.Range(-600, 600),
                 messageObj.transform.localPosition.z
             );
+            messageObj.fontSize = (int) Random.Range(RandomSizeRange.x, RandomSizeRange.y);
             messageObj.text = text;
             messageObj.gameObject.SetActive(true);
 
@@ -142,6 +148,7 @@ namespace KLOUD
                 }
                 
                 if(transforms.isCreated) transforms.Dispose();
+                if (JobCommand.localSpeed.IsCreated) JobCommand.localSpeed.Dispose();
                 if(JobCommand.DeleteTargetIndexes.IsCreated) JobCommand.DeleteTargetIndexes.Dispose();
 
                 while (!MessageEventManager.IsEmpty())
