@@ -86,63 +86,7 @@ namespace KLOUD
             transforms = new TransformAccessArray(SpawnedTexts.Select((Text t) => t.transform).ToArray());
         }
 
-        public Text SpawnText(string text, List<TwitchMessageParser.emoji> emojis) {
-            var messageObj = Instantiate(ReferenceText.gameObject, ReferenceText.transform.parent).GetComponent<Text>();
-
-            messageObj.fontSize = (int)Random.Range(RandomSizeRange.x, RandomSizeRange.y);
-            //글자 크기에 맞춰 높이 수정하여 이모티콘이 맞출 수 있게 됨
-            ((RectTransform)messageObj.transform).sizeDelta = new Vector2(text.Length * messageObj.fontSize, messageObj.fontSize);
-            messageObj.text = text;
-
-            ((RectTransform)messageObj.transform).anchorMin = new Vector2(0, 0.5f);
-            ((RectTransform)messageObj.transform).anchorMax = new Vector2(0, 0.5f);
-            ((RectTransform)messageObj.transform).pivot = Vector2.zero;
-
-            ((RectTransform)messageObj.transform).anchoredPosition = new Vector3(
-                1920,
-                Random.Range(-400, 400),
-                messageObj.transform.position.z
-            ); //600하면 FHD기준 가끔 삐져나가서 고침
-            messageObj.gameObject.SetActive(true);
-
-            foreach (var emoji in emojis) {
-                var i = 1;
-
-                messageObj.text = messageObj.text.Replace(emoji.tag, "<E>");
-
-                while (messageObj.text.Contains("<E>")) {
-                    if (messageObj.GetWordRectInText(out var rect, "<E>")) {
-                        messageObj.text = messageObj.text.ReplaceFirst("<E>", "   ");
-                        var emojiObj = Instantiate(ReferenceImage.gameObject, messageObj.transform).GetComponent<RawImage>();
-
-                        emojiObj.rectTransform.SetParent(messageObj.rectTransform);
-                        ((RectTransform)(emojiObj.transform)).anchorMin = Vector2.zero;
-                        ((RectTransform)(emojiObj.transform)).anchorMax = Vector2.zero;
-                        ((RectTransform)(emojiObj.transform)).pivot = Vector2.zero;
-
-                        var emojiRenderer = emojiObj.gameObject.AddComponent<EmojiRenderer>();
-
-                        emojiRenderer.Emoji = emoji;
-                        emojiRenderer.Image = emojiObj;
-                        emojiRenderer.Load();
-
-                        emojiObj.rectTransform.anchoredPosition = new Vector2(rect.x / 2, 0);
-                        emojiObj.rectTransform.sizeDelta = new Vector2(
-                            messageObj.rectTransform.sizeDelta.y,
-                            messageObj.rectTransform.sizeDelta.y);
-
-                        
-                        i++;
-                    } else {
-                        break;
-                    }
-                }
-
-            }
-
-
-            return messageObj;
-        }
+        public Text SpawnText(string text, List<TwitchMessageParser.emoji> emojis)
         {
             var messageObj = Instantiate(ReferenceText.gameObject, ReferenceText.transform.parent).GetComponent<Text>();
             ((RectTransform) messageObj.transform).pivot = new Vector2(-1, 1);
