@@ -65,6 +65,10 @@ public class WebsocketConnecter
         onReceivedMessage.Invoke(Encoding.UTF8.GetString(messageEventArgs.RawData).Replace("\\n", "\n"));
     }
 
+    public void Close() {
+        connection.Close();
+    }
+
     private void OnApplicationQuit()
     {
         connection.Close();

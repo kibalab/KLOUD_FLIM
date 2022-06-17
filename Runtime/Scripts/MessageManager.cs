@@ -52,8 +52,6 @@ namespace KLOUD
         private void Start()
         {
             WebsocketConnecter = new WebsocketConnecter();
-
-            WebsocketConnecter.Connect(ChennalID);
             
             WebsocketConnecter.onReceivedMessage.AddListener(
                 msg =>
@@ -62,6 +60,18 @@ namespace KLOUD
                     
                     if(!String.IsNullOrEmpty(author)) MessageEventManager.Enqueue(ctx, emojis);
                 });
+
+            ReferenceText.gameObject.SetActive(false);
+            Refresh();
+        }
+
+        //ChennalID를 외부에서 바꾼 후 이 함수를 실행하면 채널을 전환함
+        public void Refresh() {
+            if (WebsocketConnecter.connectId != "") {
+                WebsocketConnecter.Close();
+            }
+            bool isConnected = WebsocketConnecter.Connect(ChennalID);
+            Debug.Log($"{ChennalID} : {isConnected}");
         }
 
         public void UpdateJob()
@@ -82,11 +92,11 @@ namespace KLOUD
             ((RectTransform) messageObj.transform).pivot = new Vector2(-1, 1);
             ((RectTransform) messageObj.transform).anchorMin = Vector2.one;
             ((RectTransform) messageObj.transform).anchorMax = Vector2.one;
-            ((RectTransform) messageObj.transform).localPosition = new Vector3(
-                messageObj.transform.localPosition.x, 
-                Random.Range(-600, 600),
+            ((RectTransform)messageObj.transform).localPosition = new Vector3(
+                messageObj.transform.localPosition.x,
+                Random.Range(-400, 400),
                 messageObj.transform.localPosition.z
-            );
+            ); //600하면 FHD기준 가끔 삐져나가서 고침
             messageObj.fontSize = (int) Random.Range(RandomSizeRange.x, RandomSizeRange.y);
             messageObj.text = text;
             messageObj.gameObject.SetActive(true);
