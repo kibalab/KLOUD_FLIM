@@ -128,7 +128,7 @@ namespace KLOUD
 
                         Debug.Log($"X: {rect.x}");
 
-                        emojiObj.rectTransform.anchoredPosition = new Vector2(rect.x /2, 0);
+                        emojiObj.rectTransform.anchoredPosition = new Vector2(rect.x, 0);
                         emojiObj.rectTransform.sizeDelta = new Vector2(
                             messageObj.rectTransform.sizeDelta.y,
                             messageObj.rectTransform.sizeDelta.y);
