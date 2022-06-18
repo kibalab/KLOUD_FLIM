@@ -32,8 +32,12 @@ namespace KLOUD
             else {
                 Emoji.texture = (Texture2D) ((DownloadHandlerTexture) www.downloadHandler).texture;
                 
-                Image.color = Color.white;
                 Image.texture = Emoji.texture;
+
+                if (Image.texture)
+                {
+                    Image.color = Color.white;
+                }
             }
         }
     }
