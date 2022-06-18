@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using KLOUD.Twitch;
 using Unity.Collections;
 using Unity.Jobs;
@@ -105,10 +106,12 @@ namespace KLOUD
             ); //600하면 FHD기준 가끔 삐져나가서 고침
             messageObj.gameObject.SetActive(true);
 
+            Debug.Log($"[MessageManager] Initializing EmojiRenderers, Text : {messageObj.text}");
             foreach (var emoji in emojis) {
                 var i = 1;
-
-                messageObj.text = messageObj.text.Replace(emoji.tag, "<E>");
+                
+                var pattern = $@"( *)({emoji.tag})( *)";
+                messageObj.text = Regex.Replace(messageObj.text, pattern, "<E> ");
 
                 while (messageObj.text.Contains("<E>")) {
                     if (messageObj.GetWordRectInText(out var rect, "<E>")) {
